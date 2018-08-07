@@ -50,7 +50,10 @@ $(document).ready(function () {
             function (result) {
                 $.each(slugs, function (i, val) {
                     if (typeof result[val] !== 'undefined') {
-                        var $anchor = $('#main-content.has-sidebar .sidebar li a[data-handle="' + val + '"]');
+                        var $anchor = $('#main-content.has-sidebar .sidebar li a[data-entry-type="' + val + '"]');
+                        if($anchor.length === 0) {
+                            $anchor = $('#main-content.has-sidebar .sidebar li a[data-handle="' + val + '"]');
+                        }
                         if ($anchor.length > 0) {
                             addCountToAnchor(result[val], $anchor);
                         }
@@ -125,7 +128,7 @@ $(document).ready(function () {
                         var $anchor = $('#main-content.has-sidebar .sidebar li a[data-key="folder:' + val.split('|').join('/folder:') + '"]');
 
                         if ($anchor.length > 0) {
-                            addCountToAnchor(result[val], $anchor);                            
+                            addCountToAnchor(result[val], $anchor);
                         }
                     }
                 });
@@ -149,7 +152,8 @@ $(document).ready(function () {
 
         $('#main-content.has-sidebar .sidebar li a[data-key]').each(function () {
             if ($(this).data('key').match(/section:\d+/)) {
-                slugs.push($(this).data('handle'));
+                handle = $(this).data('entry-type') || $(this).data('handle');
+                slugs.push(handle);
             }
         });
 

@@ -9,11 +9,13 @@
 
 namespace aelvan\cpelementcount\services;
 
+use Craft;
 use craft\base\Component;
 use craft\elements\Asset;
 use craft\elements\Category;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\models\Section;
 
 /**
  * CpElementCountService Service
@@ -33,8 +35,19 @@ class CountService extends Component
         $r = [];
 
         foreach ($slugs as $slug) {
-            $count = Entry::find()->section($slug)->limit(null)->status(['disabled', 'enabled'])->count();
-            $r[$slug] = $count;
+            # If section is channel, count entries of type instead
+            if( $section = Craft::$app->getSections()->getSectionByHandle($slug) ) {
+                if ($section->type == Section::TYPE_CHANNEL) {
+                    $entryTypes = $section->getEntryTypes();
+                    foreach ($entryTypes as $type) {
+                        $count = Entry::find()->section($slug)->type($type->handle)->limit(null)->status(['disabled', 'enabled'])->count();
+                        $r[$type->handle] = $count;
+                    }
+                } else {
+                    $count = Entry::find()->section($slug)->limit(null)->status(['disabled', 'enabled'])->count();
+                    $r[$slug] = $count;
+                }
+            }
         }
 
         $count = Entry::find()->limit(null)->status(['disabled', 'enabled'])->count();
